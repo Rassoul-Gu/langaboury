@@ -83,7 +83,7 @@ session_start();
 <body>
 
     <h1>📝 Connexion</h1>
-    <div class="message"><?= if ($message) { echo $message; } ?></div>
+    <div class="message"><?= $message ?? '' ?></div>
 
     <form id="registerForm">
 
