@@ -560,10 +560,8 @@ function registerPlayer($pdo) {
 
 
 function login_player($pdo) {
-    $input = json_decode(file_get_contents('php://input'), true);
-    
-    $email = trim($input['email'] ?? '');
-    $code_access = trim($input['code_access'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $code_access = strtoupper(trim($_POST['code_access'] ?? ''));
     
     if (!$email || !$code_access) {
         http_response_code(400);
