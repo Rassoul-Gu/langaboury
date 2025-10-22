@@ -1,8 +1,6 @@
 <?php
 require_once 'config.php';
 session_start();
-
-
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -89,10 +87,10 @@ session_start();
 
     <form id="registerForm">
         <label>Nom :</label>
-        <input type="text" name="nom" required>
+        <input type="text" name="name" required>
 
         <label>Prénom :</label>
-        <input type="text" name="prenom" required>
+        <input type="text" name="surname" required>
 
         <label>Email :</label>
         <input type="email" name="email" required>
