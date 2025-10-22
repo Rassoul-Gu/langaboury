@@ -82,12 +82,16 @@ session_start();
 </head>
 <body>
 
-    <h1>📝 Inscription</h1>
-    <div class="message"><?= $message ?></div>
+    <h1>📝 Connexion</h1>
+    <div class="message"><?= if ($message) { echo $message; } ?></div>
 
     <form id="registerForm">
 
-        
+        <label>Email :</label>
+        <input type="email" name="email" required>
+
+        <label>Code d'accès :</label>
+        <input type="text" name="code_acces" required>
 
         <label>Email :</label>
         <input type="email" name="email" required>
