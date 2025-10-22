@@ -87,11 +87,6 @@ session_start();
 
     <form id="registerForm">
 
-        <label>Email :</label>
-        <input type="email" name="email" required>
-
-        <label>Code d'accès :</label>
-        <input type="text" name="code_acces" required>
 
         <label>Email :</label>
         <input type="email" name="email" required>
