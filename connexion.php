@@ -113,7 +113,7 @@ session_start();
             const data = await res.json();
             if (data.success) {
                 // Afficher message de succès
-                alert('✅ Connexion réussie ! Redirection...', 'success');
+                // alert('✅ Connexion réussie ! Redirection...', 'success');
                 
                 // Redirection vers player.html après 1.5 secondes
                 setTimeout(() => {
