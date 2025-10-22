@@ -609,10 +609,7 @@ function login_player($pdo) {
         $_SESSION['group_name'] = $player['group_name'];
         $_SESSION['login_time'] = time();
         $_SESSION['timeout'] = 7200;
-        
-        // Mettre à jour la dernière connexion
-        $updateStmt = $pdo->prepare('UPDATE players_table SET last_login = NOW() WHERE id = ?');
-        $updateStmt->execute([$player['id']]);
+
         
         echo json_encode([
             'success' => true,
