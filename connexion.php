@@ -86,14 +86,14 @@ session_start();
     <div class="message"><?= $message ?></div>
 
     <form id="registerForm">
-        <label>Nom :</label>
-        <input type="text" name="name" required>
 
-        <label>Prénom :</label>
-        <input type="text" name="surname" required>
+        
 
         <label>Email :</label>
         <input type="email" name="email" required>
+
+        <label>Code d'accès :</label>
+        <input type="text" name="code_acces" required>
 
         <button type="submit">S'inscrire</button>
 
