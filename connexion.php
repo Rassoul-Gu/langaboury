@@ -1,31 +1,30 @@
 <?php
 // ====================================================================
-//  Fichier : connexion.php
-//  Projet  : Langaboury
-//  Style   : Repris de player.html
+// Connexion - Langaboury (style calqué sur player.html)
 // ====================================================================
-
 session_start();
-require_once 'config.php'; // Connexion à la base MySQL
+require_once 'config.php'; // $pdo (PDO) attendu
 
-// Si le formulaire est envoyé
+$error = null;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email']);
-    $code = trim($_POST['code_acces']);
+    $email = trim($_POST['email'] ?? '');
+    $code  = trim($_POST['code_acces'] ?? '');
 
-    if (empty($email) || empty($code)) {
+    if ($email === '' || $code === '') {
         $error = "Veuillez remplir tous les champs.";
     } else {
         try {
-            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND code_acces = :code");
+            // Adapte le nom de table/colonnes si besoin
+            $stmt = $pdo->prepare("SELECT id, nom, prenom, email FROM users WHERE email = :email AND code_acces = :code LIMIT 1");
             $stmt->execute(['email' => $email, 'code' => $code]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user) {
-                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['user_id']    = $user['id'];
                 $_SESSION['user_email'] = $user['email'];
-                $_SESSION['user_nom'] = $user['nom'];
-                $_SESSION['user_prenom'] = $user['prenom'];
+                $_SESSION['user_nom']   = $user['nom'] ?? '';
+                $_SESSION['user_prenom']= $user['prenom'] ?? '';
 
                 header('Location: player.html');
                 exit;
@@ -33,106 +32,175 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = "Email ou code d'accès incorrect.";
             }
         } catch (PDOException $e) {
-            $error = "Erreur interne : " . $e->getMessage();
+            $error = "Erreur interne : " . htmlspecialchars($e->getMessage());
         }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Connexion - Langaboury</title>
-  <link rel="stylesheet" href="style.css"> <!-- même CSS que player.html -->
-  <style>
-    /* Adaptation visuelle pour le style de player.html */
-    body {
-        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-        font-family: 'Poppins', sans-serif;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        margin: 0;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Connexion - Langaboury</title>
+    <meta name="theme-color" content="#667eea">
+    <style>
+        /* ======= Base : mêmes fond/typo que player.html ======= */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .header {
+            background: rgba(255,255,255,0.98);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 10px 0 20px 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+        .header h3 {
+            font-size: 20px;
+            color: #111827;
+            margin-bottom: 8px;
+        }
 
-    .login-container {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        padding: 40px;
-        width: 400px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        backdrop-filter: blur(10px);
-        text-align: center;
-    }
+        /* ======= Carte (style “glass” cohérent) ======= */
+        .card {
+            background: rgba(255,255,255,0.98);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.7);
+        }
 
-    h2 {
-        margin-bottom: 20px;
-        color: #00d4ff;
-    }
+        /* ======= Formulaire ======= */
+        .form-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .form-group { margin-bottom: 14px; }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #374151;
+            font-weight: 600;
+        }
+        input[type="email"], input[type="text"] {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 2px solid #e5e7eb;
+            outline: none;
+            background: #f9fafb;
+            font-size: 16px;
+            transition: all .2s ease;
+        }
+        input[type="email"]:focus, input[type="text"]:focus {
+            border-color: #667eea;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.15);
+        }
 
-    input[type="email"], input[type="text"] {
-        width: 80%;
-        padding: 12px;
-        border: none;
-        border-radius: 10px;
-        margin: 10px 0;
-        font-size: 16px;
-        outline: none;
-        text-align: center;
-    }
+        /* ======= Boutons : mêmes classes .btn / .btn-primary que player.html ======= */
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #ffffff;
+            box-shadow: 0 10px 20px rgba(102,126,234,0.3);
+        }
+        .btn-primary:hover { box-shadow: 0 14px 26px rgba(102,126,234,0.35); }
 
-    button {
-        background-color: #00d4ff;
-        border: none;
-        color: #fff;
-        padding: 12px 25px;
-        border-radius: 10px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
+        /* ======= Alertes (cohérentes avec palette de player) ======= */
+        .alert {
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .alert.error {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #991b1b;
+            border: 3px solid #ef4444;
+        }
 
-    button:hover {
-        background-color: #008ab8;
-        transform: scale(1.05);
-    }
+        /* ======= Layout ======= */
+        .content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        .card .hint {
+            color: #6b7280;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 8px;
+        }
 
-    .error {
-        color: #ff7b7b;
-        margin-bottom: 15px;
-        font-weight: bold;
-    }
-
-    a {
-        color: #00d4ff;
-        text-decoration: none;
-    }
-
-    a:hover {
-        text-decoration: underline;
-    }
-  </style>
+        @media (min-width: 700px) {
+            .container { max-width: 560px; }
+        }
+    </style>
 </head>
 <body>
-  <div class="login-container">
-    <h2>Connexion à Langaboury</h2>
+    <div class="container">
+        <!-- En-tête visuel aligné à player.html -->
+        <div class="header">
+            <h3>🔐 Connexion</h3>
+            <p style="color:#6b7280;">Accédez à votre espace joueur avec votre email et votre code d’accès.</p>
+        </div>
 
-    <?php if (isset($error)) : ?>
-      <p class="error"><?= htmlspecialchars($error) ?></p>
-    <?php endif; ?>
+        <div class="content">
+            <div class="card">
+                <h2 class="form-title">Se connecter à Langaboury</h2>
 
-    <form action="connexion.php" method="POST">
-      <input type="email" name="email" placeholder="Adresse e-mail" required><br>
-      <input type="text" name="code_acces" placeholder="Code d'accès" maxlength="20" required><br>
-      <button type="submit">Se connecter</button>
-    </form>
+                <?php if ($error): ?>
+                    <div class="alert error"><?= htmlspecialchars($error) ?></div>
+                <?php endif; ?>
 
-    <p style="margin-top:20px;">
-      <a href="admin.html">Espace administrateur</a>
-    </p>
-  </div>
+                <form method="POST" action="connexion.php" autocomplete="on">
+                    <div class="form-group">
+                        <label for="email">Adresse e-mail</label>
+                        <input type="email" id="email" name="email" placeholder="exemple@aser-rouen.fr" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="code_acces">Code d'accès</label>
+                        <input type="text" id="code_acces" name="code_acces" maxlength="20" placeholder="Votre code alphanumérique" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <span>✅</span><span>Se connecter</span>
+                    </button>
+
+                    <p class="hint">Besoin d’aide ? Contactez l’admin.</p>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
