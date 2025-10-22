@@ -1,11 +1,6 @@
 <?php
 session_start();
-require_once 'config.php';
-require_once 'utils/connexion.php';
-if (!isset($_SESSION['player_id'])) {
-    header('Location: connexion.php');
-    exit;
-}
+echo $_SESSION['player_id'];
 ?>
 
 <!DOCTYPE html>

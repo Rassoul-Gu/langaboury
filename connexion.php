@@ -1,6 +1,7 @@
 <?php
-require_once 'config.php';
 session_start();
+require_once 'config.php';
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -117,7 +118,7 @@ session_start();
                 
                 // Redirection vers player.html après 1.5 secondes
                 setTimeout(() => {
-                    window.location.href = '/player.html';
+                    window.location.href = '/player.php';
                 }, 500);
             } else {
                 alert('❌ ' + (data.error || 'Erreur de connexion'), 'error');

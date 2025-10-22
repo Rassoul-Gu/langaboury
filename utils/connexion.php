@@ -208,7 +208,8 @@ function verify_session($pdo) {
         http_response_code(401);
         exit(json_encode(['error' => 'Joueur introuvable']));
     }
-    
+    header('Location : /player.php');
+    exit;
     echo json_encode([
         'authenticated' => true,
         'player' => [
