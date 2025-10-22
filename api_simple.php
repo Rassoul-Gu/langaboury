@@ -2,6 +2,8 @@
 
 require_once 'config.php';
 require_once 'utils/connexion.php';
+require_once 'utils/players.php';
+require_once 'utils/admin.php';
 
 // Headers CORS
 header('Content-Type: application/json; charset=utf-8');
