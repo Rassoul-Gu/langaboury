@@ -92,7 +92,7 @@ session_start();
         <input type="email" name="email" required>
 
         <label>Code d'accès :</label>
-        <input type="text" name="code_acces" required>
+        <input type="text" name="code_access" required>
 
         <button type="submit">S'inscrire</button>
 
