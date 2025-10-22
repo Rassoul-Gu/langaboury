@@ -2,58 +2,7 @@
 require_once 'config.php';
 session_start();
 
-// Fonction pour générer un code alphanumérique
-function genererCode($longueur = 6) {
-    $caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return substr(str_shuffle($caracteres), 0, $longueur);
-}
 
-// Traitement du formulaire
-$message = "";
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nom = trim($_POST['nom']);
-    $prenom = trim($_POST['prenom']);
-    $email = trim($_POST['email']);
-    $groupe = trim($_POST['groupe']);
-
-    if ($nom && $prenom && $email) {
-        $code = genererCode();
-
-        try {
-            $db = getDB();
-
-            // Vérifie si l'email existe déjà
-            $check = $db->prepare("SELECT * FROM utilisateurs WHERE email = ?");
-            $check->execute([$email]);
-            if ($check->rowCount() > 0) {
-                $message = "<p class='error'>❌ Cet e-mail est déjà inscrit.</p>";
-            } else {
-                // Insertion
-                $sql = "INSERT INTO utilisateurs (nom, prenom, email, code_acces, groupe)
-                        VALUES (?, ?, ?, ?, ?)";
-                $stmt = $db->prepare($sql);
-                $stmt->execute([$nom, $prenom, $email, $code, $groupe]);
-
-                // Envoi du mail
-                $to = $email;
-                $subject = "Votre code d'accès - Chasse au Trésor Langaboury";
-                $body = "Bonjour $prenom $nom,\n\nVoici votre code d'accès : $code\n\nConnectez-vous sur : " . BASE_URL . "/connexion.php\n\nBonne chance dans le jeu !\n\n— L'équipe ASER Rouen";
-                $headers = "From: admin@aser-rouen.fr";
-
-                if (mail($to, $subject, $body, $headers)) {
-                    $message = "<p class='success'>✅ Inscription réussie ! Votre code a été envoyé à votre e-mail.</p>";
-                } else {
-                    $message = "<p class='warning'>⚠️ Inscription réussie, mais l'envoi du mail a échoué.</p>";
-                }
-            }
-        } catch (PDOException $e) {
-            $message = "<p class='error'>Erreur : " . $e->getMessage() . "</p>";
-        }
-    } else {
-        $message = "<p class='error'>❗ Veuillez remplir tous les champs obligatoires.</p>";
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -138,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1>📝 Inscription</h1>
     <div class="message"><?= $message ?></div>
 
-    <form method="POST" action="">
+    <form id="registerForm">
         <label>Nom :</label>
         <input type="text" name="nom" required>
 
@@ -154,6 +103,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Déjà inscrit ? <a href="connexion.php">Se connecter</a>
         </p>
     </form>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const res = await fetch('api_simple.php?action=register_player', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        alert(data.message);
+    });
+    </script>
 
 </body>
 </html>

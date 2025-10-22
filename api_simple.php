@@ -63,6 +63,10 @@ switch ($action) {
         adminGetEnigmesByGroup($pdo);
         break;
     
+    case 'register_player':
+        registerPlayer($pdo);
+        break;
+
     default:
         http_response_code(400);
         echo json_encode(['error' => 'Action invalide: ' . $action]);
@@ -455,4 +459,88 @@ function adminGetEnigmesByGroup($pdo) {
     $enigmes = $stmt->fetchAll();
     
     echo json_encode(['enigmes' => $enigmes]);
+}
+
+// ==================== FONCTIONS CONNEXION ====================
+
+
+
+function generateAccessCode($length = 8) {
+    $characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    $code = '';
+    for ($i = 0; $i < $length; $i++) {
+        $code .= $characters[random_int(0, strlen($characters) - 1)];
+    }
+    return $code;
+}
+
+function registerPlayer($pdo) {
+    $name = trim($_POST['name'] ?? '');
+    $surname = trim($_POST['surname'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+
+    if ($name === '' || $surname === '' || $email === '') {
+        echo json_encode(['status' => 'error', 'message' => 'Veuillez remplir tous les champs.']);
+        return;
+    }
+
+    try {
+        // Vérifie si l'email existe déjà
+        $check = $pdo->prepare("SELECT id FROM players_table WHERE email = ?");
+        $check->execute([$email]);
+        if ($check->fetch()) {
+            echo json_encode(['status' => 'error', 'message' => 'Cet e-mail est déjà inscrit.']);
+            return;
+        }
+
+        // Génère un code d’accès unique
+        $code = generateAccessCode(8);
+
+        // Sélectionne un groupe aléatoire existant
+        $stmtGroup = $pdo->query("SELECT id FROM groups_table ORDER BY RAND() LIMIT 1");
+        $group = $stmtGroup->fetch(PDO::FETCH_ASSOC);
+        $group_id = $group ? $group['id'] : null;
+
+        // Insère le joueur
+        $insert = $pdo->prepare("
+            INSERT INTO players_table (name, surname, email, access_code, group_id)
+            VALUES (:name, :surname, :email, :access_code, :group_id)
+        ");
+        $insert->execute([
+            'name' => $name,
+            'surname' => $surname,
+            'email' => $email,
+            'access_code' => $code,
+            'group_id' => $group_id
+        ]);
+
+        // Envoie le mail avec le code
+        $subject = "Votre code d'accès Langaboury";
+        $message = "
+            <html><body style='font-family:Arial,sans-serif;'>
+            <h2>Bienvenue sur Langaboury 🎉</h2>
+            <p>Bonjour <strong>{$surname} {$name}</strong>,</p>
+            <p>Votre code d'accès personnel est :</p>
+            <h3 style='color:#667eea; font-size:24px;'>{$code}</h3>
+            <p>Ce code vous permet de vous connecter sur : 
+            <a href='http://aser-rouen.fr/connexion.php'>Langaboury - Connexion</a></p>
+            <hr>
+            <p style='color:#666;'>Ne partagez pas ce code. Bon jeu !</p>
+            </body></html>
+        ";
+
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-type:text/html;charset=UTF-8\r\n";
+        $headers .= "From: Langaboury <admin@aser-rouen.fr>\r\n";
+
+        @mail($email, $subject, $message, $headers);
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => "Inscription réussie ! Le code a été envoyé à {$email}.",
+            'access_code' => $code
+        ]);
+    } catch (Exception $e) {
+        echo json_encode(['status' => 'error', 'message' => 'Erreur : ' . $e->getMessage()]);
+    }
 }
