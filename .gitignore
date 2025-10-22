@@ -1,0 +1,7 @@
+*.sql
+
+*.ini
+
+.env
+
+test_*
