@@ -1,9 +1,6 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])){
-    header("lLocation : connexion.php");
-    exit;
-}
+echo $_SESSION['player_id'];
 ?>
 
 <!DOCTYPE html>
