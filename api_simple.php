@@ -66,7 +66,7 @@ switch ($action) {
     case 'register_player':
         registerPlayer($pdo);
         break;
-        
+
     case 'login_player':
         login_player($pdo);
         break;
@@ -591,30 +591,28 @@ function login_player($pdo) {
         
         // Configuration de la session avec timeout de 2 heures
         session_set_cookie_params([
-            'lifetime' => 7200, // 2 heures en secondes
+            'lifetime' => 7200,
             'path' => '/',
             'domain' => $_SERVER['HTTP_HOST'] ?? '',
-            'secure' => isset($_SERVER['HTTPS']), // Secure en HTTPS
-            'httponly' => true, // Empêche l'accès via JavaScript
+            'secure' => isset($_SERVER['HTTPS']),
+            'httponly' => true,
             'samesite' => 'Strict'
         ]);
         
         session_start();
-        
-        // Régénérer l'ID de session pour éviter les fixation attacks
         session_regenerate_id(true);
         
-        // Stocker les infos de session avec timestamp
+        // Stocker les infos de session
         $_SESSION['player_id'] = $player['id'];
         $_SESSION['player_email'] = $player['email'];
         $_SESSION['player_name'] = $player['name'];
         $_SESSION['player_surname'] = $player['surname'];
         $_SESSION['group_id'] = $player['group_id'];
         $_SESSION['group_name'] = $player['group_name'];
-        $_SESSION['login_time'] = time(); // Timestamp de connexion
-        $_SESSION['timeout'] = 7200; // 2 heures en secondes
+        $_SESSION['login_time'] = time();
+        $_SESSION['timeout'] = 7200;
         
-        // Mettre à jour la dernière connexion en base
+        // Mettre à jour la dernière connexion
         $updateStmt = $pdo->prepare('UPDATE players_table SET last_login = NOW() WHERE id = ?');
         $updateStmt->execute([$player['id']]);
         
@@ -633,6 +631,7 @@ function login_player($pdo) {
             ],
             'session_id' => session_id(),
             'timeout' => 7200,
+            'redirect_url' => '/player.html', // AJOUT DE LA REDIRECTION
             'message' => 'Connexion réussie'
         ]);
         

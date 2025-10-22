@@ -3,39 +3,7 @@
 // Connexion - Langaboury (style calqué sur player.html)
 // ====================================================================
 session_start();
-require_once 'config.php'; // $pdo (PDO) attendu
 
-$error = null;
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
-    $code  = trim($_POST['code_acces'] ?? '');
-
-    if ($email === '' || $code === '') {
-        $error = "Veuillez remplir tous les champs.";
-    } else {
-        try {
-            // Adapte le nom de table/colonnes si besoin
-            $stmt = $pdo->prepare("SELECT id, nom, prenom, email FROM users WHERE email = :email AND code_acces = :code LIMIT 1");
-            $stmt->execute(['email' => $email, 'code' => $code]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($user) {
-                $_SESSION['user_id']    = $user['id'];
-                $_SESSION['user_email'] = $user['email'];
-                $_SESSION['user_nom']   = $user['nom'] ?? '';
-                $_SESSION['user_prenom']= $user['prenom'] ?? '';
-
-                header('Location: player.html');
-                exit;
-            } else {
-                $error = "Email ou code d'accès incorrect.";
-            }
-        } catch (PDOException $e) {
-            $error = "Erreur interne : " . htmlspecialchars($e->getMessage());
-        }
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -182,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="alert error"><?= htmlspecialchars($error) ?></div>
                 <?php endif; ?>
 
-                <form method="POST" action="connexion.php" autocomplete="on">
+                <form autocomplete="on">
                     <div class="form-group">
                         <label for="email">Adresse e-mail</label>
                         <input type="email" id="email" name="email" placeholder="exemple@aser-rouen.fr" required />
@@ -202,5 +170,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
+
+    <script>
+        // Gestion du formulaire de connexion
+        document.querySelector('form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await fetch('api_simple.php?action=login_player', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                // Afficher message de succès
+                showMessage('✅ Connexion réussie ! Redirection...', 'success');
+                
+                // Redirection vers player.html après 1.5 secondes
+                setTimeout(() => {
+                    window.location.href = '/player.html';
+                }, 500);
+            } else {
+                showMessage('❌ ' + (data.error || 'Erreur de connexion'), 'error');
+            }
+            alert(data.message);
+        });
+    </script>
 </body>
+</html>
+
 </html>
