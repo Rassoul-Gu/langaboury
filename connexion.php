@@ -122,7 +122,7 @@ session_start();
             } else {
                 alert('❌ ' + (data.error || 'Erreur de connexion'), 'error');
             }
-            alert(data.message);
+            // alert(data.message);
         });
     </script>
 </body>
