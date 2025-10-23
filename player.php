@@ -398,6 +398,72 @@
                 font-size: 20px;
             }
         }
+
+        /* --- HISTORIQUE DES BONNES RÉPONSES --- */
+
+        .historique-wrapper {
+            background: linear-gradient(135deg, #7b61ff, #6342f5);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 40px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        .historique-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 25px;
+            color: #fff;
+        }
+
+        .historique-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .historique-card {
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            color: #333;
+            font-weight: 500;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .historique-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .historique-question {
+            color: #4f46e5;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .historique-answer {
+            background: #e0e7ff;
+            color: #1e3a8a;
+            font-weight: bold;
+            padding: 8px 14px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .no-history {
+            text-align: center;
+            font-size: 1.1em;
+            color: #f0f0f0;
+            opacity: 0.9;
+        }
+
     </style>
 </head>
 <body>
@@ -480,13 +546,28 @@
                 </div>
             </div>
 
-            <!-- 🧩 Historique des bonnes réponses -->
-            <div id="historique-container" style="margin-top:40px;">
-                <h2 style="color:#2563EB;">Historique des bonnes réponses du groupe</h2>
-                <div id="historique-content">
-                    <p style="color:#555;">Chargement...</p>
-                </div>
+            <!-- 🧩 Historique des bonnes réponses du groupe -->
+            <div class="historique-wrapper">
+                <h2 class="historique-title">🏆 Historique des bonnes réponses du groupe</h2>
+
+                <?php if (empty($historique)): ?>
+                    <p class="no-history">Aucune bonne réponse enregistrée pour le moment.</p>
+                <?php else: ?>
+                    <div class="historique-cards">
+                        <?php foreach ($historique as $item): ?>
+                            <div class="historique-card">
+                                <div class="historique-question">
+                                    <?php echo htmlspecialchars($item['question_name']); ?>
+                                </div>
+                                <div class="historique-answer">
+                                    <?php echo htmlspecialchars($item['correct_answer']); ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
+
         </div>
     </div>
 
