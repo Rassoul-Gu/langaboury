@@ -8,7 +8,6 @@ function generateAccessCode($length = 8) {
     }
     return $code;
 }
-
 function registerPlayer($pdo) {
     $name = trim($_POST['name'] ?? '');
     $surname = trim($_POST['surname'] ?? '');
@@ -28,13 +27,28 @@ function registerPlayer($pdo) {
             return;
         }
 
-        // Génère un code d’accès unique
+        // Génère un code d'accès unique
         $code = generateAccessCode(8);
 
-        // Sélectionne un groupe aléatoire existant
-        $stmtGroup = $pdo->query("SELECT id FROM groups_table ORDER BY RAND() LIMIT 1");
+        // Sélectionne le groupe avec le MOINS de joueurs
+        $stmtGroup = $pdo->prepare("
+            SELECT g.id, COUNT(p.id) as player_count
+            FROM groups_table g
+            LEFT JOIN players_table p ON g.id = p.group_id
+            GROUP BY g.id
+            ORDER BY player_count ASC, g.id ASC
+            LIMIT 1
+        ");
+        $stmtGroup->execute();
         $group = $stmtGroup->fetch(PDO::FETCH_ASSOC);
         $group_id = $group ? $group['id'] : null;
+
+        // Si aucun groupe n'existe, créer un groupe par défaut
+        if (!$group_id) {
+            $createGroup = $pdo->prepare("INSERT INTO groups_table (name, color) VALUES (?, ?)");
+            $createGroup->execute(['Groupe Principal', '#667eea']);
+            $group_id = $pdo->lastInsertId();
+        }
 
         // Insère le joueur
         $insert = $pdo->prepare("
@@ -73,7 +87,8 @@ function registerPlayer($pdo) {
         echo json_encode([
             'status' => 'success',
             'message' => "Inscription réussie ! Le code a été envoyé à {$email}.",
-            'access_code' => $code
+            'access_code' => $code,
+            'group_id' => $group_id
         ]);
     } catch (Exception $e) {
         echo json_encode(['status' => 'error', 'message' => 'Erreur : ' . $e->getMessage()]);
@@ -148,7 +163,7 @@ function login_player($pdo) {
             ],
             'session_id' => session_id(),
             'timeout' => 7200,
-            'redirect_url' => '/player.html', // AJOUT DE LA REDIRECTION
+            'redirect_url' => '/player.php', // AJOUT DE LA REDIRECTION
             'message' => 'Connexion réussie'
         ]);
         

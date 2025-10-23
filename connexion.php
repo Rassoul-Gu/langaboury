@@ -116,15 +116,15 @@ require_once 'config.php';
                 const sessionResult = await storeSessionData(data.player);
                 
                 if (sessionResult.success) {
-                    showMessage('✅ Connexion réussie ! Redirection...', 'success');
+                    //showMessage('✅ Connexion réussie ! Redirection...', 'success');
                     
                     // Animation de succès
-                    submitBtn.innerHTML = `
+                    /*submitBtn.innerHTML = `
                         <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
                             <span>✅</span>
                             <span>Connecté !</span>
                         </div>
-                    `;
+                    `;*/
                     
                     // Redirection après 1.5 secondes
                     setTimeout(() => {
