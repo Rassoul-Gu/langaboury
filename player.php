@@ -402,18 +402,15 @@ echo $_SESSION['player_id'];
 </head>
 <body>
     <div class="container">
-        <!-- Sélection du groupe -->
-        <div class="header" id="selectGroup">
-            <h3>🎮 Sélectionnez votre groupe</h3>
-            <select id="groupSelect">
-                <option value="">-- Choisir un groupe --</option>
-            </select>
-            <button class="btn btn-primary" onclick="startGame()">
-                <span>🚀</span>
-                <span>Commencer l'Aventure</span>
-            </button>
+        <!-- Chargement en cours -->
+        <div class="header" id="loadingGroup">
+            <h3>🎮 Chargement...</h3>
+            <div class="loader"></div>
+            <p style="text-align: center; color: #6b7280; margin-top: 15px;">
+                Récupération de vos informations...
+            </p>
         </div>
-
+        
         <!-- Interface de jeu -->
         <div id="gameInterface" class="hidden">
             <div class="header">
@@ -493,40 +490,34 @@ echo $_SESSION['player_id'];
         let isScanning = false;
 
         // Charger les groupes au démarrage
-        window.addEventListener('load', loadGroups);
+        window.addEventListener('load', startGame);
 
-        async function loadGroups() {
+
+        async function startGame() {
             try {
-                const res = await fetch('api_simple.php?action=get_groups&game_id=1');
-                const data = await res.json();
+                // Récupérer le groupId depuis la session PHP
+                const sessionGroupId = <?php echo isset($_SESSION['group_id']) ? $_SESSION['group_id'] : 'null'; ?>;
                 
-                const select = document.getElementById('groupSelect');
-                data.groups.forEach(group => {
-                    const option = document.createElement('option');
-                    option.value = group.id;
-                    option.textContent = group.name;
-                    select.appendChild(option);
-                });
+                if (!sessionGroupId) {
+                    throw new Error('Aucun groupe trouvé dans la session');
+                }
+                
+                groupId = sessionGroupId;
+                
+                // Masquer le loading et afficher l'interface de jeu
+                document.getElementById('loadingGroup').classList.add('hidden');
+                document.getElementById('gameInterface').classList.remove('hidden');
+                
+                // Charger les données initiales
+                await loadGameState();
+                await loadTeamName();
+                startLeaderboardRefresh();
+                
             } catch (error) {
-                alert('Erreur de chargement des groupes');
+                console.error('Erreur démarrage:', error);
+                alert('Erreur: ' + error.message + '\nRedirection vers la connexion...');
+                window.location.href = '/connexion.php';
             }
-        }
-
-        function startGame() {
-            const select = document.getElementById('groupSelect');
-            groupId = select.value;
-            
-            if (!groupId) {
-                alert('Veuillez choisir un groupe');
-                return;
-            }
-            
-            document.getElementById('selectGroup').classList.add('hidden');
-            document.getElementById('gameInterface').classList.remove('hidden');
-            document.getElementById('teamName').textContent = select.options[select.selectedIndex].text;
-            
-            loadGameState();
-            startLeaderboardRefresh();
         }
 
         async function loadGameState() {
@@ -544,6 +535,20 @@ echo $_SESSION['player_id'];
                 loadLeaderboard();
             } catch (error) {
                 console.error('Erreur:', error);
+            }
+        }
+
+
+
+        async function loadTeamName() {
+            try {
+                // Récupérer le nom du groupe depuis la session PHP
+                const teamName = "<?php echo isset($_SESSION['group_name']) ? htmlspecialchars($_SESSION['group_name']) : 'Mon Groupe'; ?>";
+                document.getElementById('teamName').textContent = teamName;
+                
+            } catch (error) {
+                console.error('Erreur chargement nom:', error);
+                document.getElementById('teamName').textContent = 'Mon Groupe';
             }
         }
 
@@ -634,7 +639,7 @@ echo $_SESSION['player_id'];
                 alert('Entrez un code QR');
                 return;
             }
-            
+        
             try {
                 const res = await fetch('api_simple.php', {
                     method: 'POST',
@@ -675,7 +680,7 @@ echo $_SESSION['player_id'];
                 alert('Entrez une réponse');
                 return;
             }
-            
+        
             try {
                 const res = await fetch('api_simple.php', {
                     method: 'POST',
