@@ -94,10 +94,10 @@ require_once 'config.php';
         <label>Code d'accès :</label>
         <input type="text" name="code_access" required>
 
-        <button type="submit">S'inscrire</button>
+        <button type="submit">Se connecter</button>
 
         <p style="margin-top:15px; text-align:center;">
-            Déjà inscrit ? <a href="connexion.php">Se connecter</a>
+            Pas encore inscrit ? <a href="connexion.php">S'inscrire</a>
         </p>
     </form>
 
