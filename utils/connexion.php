@@ -130,7 +130,7 @@ function login_player($pdo) {
         $_SESSION['group_id'] = $player['group_id'];
         $_SESSION['group_name'] = $player['group_name'];
         $_SESSION['login_time'] = time();
-        $_SESSION['timeout'] = 7200;
+        $_SESSION['timeout'] = 30;
 	//header('Location : player.php');
 	//exit;
         echo json_encode([
