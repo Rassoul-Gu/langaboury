@@ -73,8 +73,11 @@ switch ($action) {
     case 'login_player':
         login_player($pdo);
         break;
+
+    case 'set_session':
+        set_session($pdo);
+        break;
     
-    // AJOUTEZ CES DEUX LIGNES ↓
     case 'verify_session':
         verify_session($pdo);
         break;
