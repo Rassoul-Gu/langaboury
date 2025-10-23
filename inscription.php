@@ -1,7 +1,104 @@
 <?php
 require_once 'config.php';
-session_start();
+
+// Configuration SMTP via ini_set
+ini_set("SMTP", "smtp.aser-rouen.fr");
+ini_set("smtp_port", "587");
+ini_set("sendmail_from", "admin@aser-rouen.fr");
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['name'] ?? '');
+    $surname = trim($_POST['surname'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+
+    if (empty($name) || empty($surname) || empty($email)) {
+        die("Veuillez remplir tous les champs.");
+    }
+
+    try {
+        $pdo = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4", $dbUser, $dbPass, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        ]);
+
+        // Vérifier si l'utilisateur existe déjà
+        $check = $pdo->prepare("SELECT id FROM players_table WHERE email = ?");
+        $check->execute([$email]);
+        if ($check->rowCount() > 0) {
+            die("Un compte existe déjà avec cet email.");
+        }
+
+        // Générer un code d'accès
+        $access_code = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 8);
+
+        // ✅ CORRECTION : Attribution proportionnelle des groupes
+        $pdo->beginTransaction();
+
+        // Récupérer les groupes avec leur nombre de joueurs
+        $stmt = $pdo->query("
+            SELECT g.id, COUNT(p.id) AS player_count
+            FROM groups_table g
+            LEFT JOIN players_table p ON p.group_id = g.id
+            GROUP BY g.id
+            ORDER BY player_count ASC
+        ");
+
+        $groups = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$groups) {
+            $pdo->rollBack();
+            die("Aucun groupe n'existe dans la base.");
+        }
+
+        // Trouver le nombre minimal de joueurs
+        $min_count = $groups[0]['player_count'];
+        
+        // Filtrer les groupes ayant le minimum de joueurs
+        $available_groups = [];
+        foreach ($groups as $group) {
+            if ($group['player_count'] == $min_count) {
+                $available_groups[] = $group;
+            }
+        }
+
+        // Choisir aléatoirement parmi les groupes disponibles
+        $selected_group = $available_groups[array_rand($available_groups)];
+        $group_id = $selected_group['id'];
+
+        // Insérer le joueur
+        $insert = $pdo->prepare("
+            INSERT INTO players_table (name, surname, email, access_code, group_id)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        $insert->execute([$name, $surname, $email, $access_code, $group_id]);
+
+        $pdo->commit();
+
+        // Envoi du mail
+        $subject = "Votre code d'accès au jeu Langaboury";
+        $message = "Bonjour $name $surname,\n\n".
+                   "Voici votre code d'accès : $access_code\n".
+                   "Vous avez été ajouté au groupe #$group_id.\n\n".
+                   "Conservez bien ce code pour vous connecter.\n\n".
+                   "Bonne chance !";
+        $headers = "From: admin@aser-rouen.fr\r\n";
+        $headers .= "Reply-To: admin@aser-rouen.fr\r\n";
+
+        mail($email, $subject, $message, $headers);
+
+        header("Location: player.php?code=$access_code");
+        exit;
+
+    } catch (Exception $e) {
+        if (isset($pdo) && $pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        die("Erreur : " . $e->getMessage());
+    }
+}
 ?>
+
+
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
