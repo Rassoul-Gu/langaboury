@@ -1,6 +1,6 @@
 <?php
 require_once 'config.php';
-session_start();
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -82,18 +82,17 @@ session_start();
 </head>
 <body>
 
-    <h1>📝 Inscription</h1>
-    <div class="message"><?= $message ?></div>
+    <h1>📝 Connexion</h1>
+    <div class="message"><?= $message ?? '' ?></div>
 
     <form id="registerForm">
-        <label>Nom :</label>
-        <input type="text" name="name" required>
 
-        <label>Prénom :</label>
-        <input type="text" name="surname" required>
 
         <label>Email :</label>
         <input type="email" name="email" required>
+
+        <label>Code d'accès :</label>
+        <input type="text" name="code_access" required>
 
         <button type="submit">S'inscrire</button>
 
@@ -101,18 +100,68 @@ session_start();
             Déjà inscrit ? <a href="connexion.php">Se connecter</a>
         </p>
     </form>
-    <script>
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const res = await fetch('api_simple.php?action=register_player', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        alert(data.message);
-    });
-    </script>
 
+    <script>
+        // Gestion du formulaire de connexion
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await fetch('api_simple.php?action=login_player', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                // ✅ Stocker les données dans la session PHP via l'API
+                const sessionResult = await storeSessionData(data.player);
+                
+                if (sessionResult.success) {
+                    showMessage('✅ Connexion réussie ! Redirection...', 'success');
+                    
+                    // Animation de succès
+                    submitBtn.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <span>✅</span>
+                            <span>Connecté !</span>
+                        </div>
+                    `;
+                    
+                    // Redirection après 1.5 secondes
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url || '/player.php';
+                    }, 1500);
+                } else {
+                    throw new Error('Erreur lors de la création de la session');
+                }
+                
+            } else {
+                throw new Error(data.error || 'Échec de la connexion');
+            }
+        });
+
+        // Fonction pour stocker les données dans la session PHP via l'API
+        async function storeSessionData(playerData) {
+            try {
+                const response = await fetch('api_simple.php?action=set_session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        player_data: playerData
+                    })
+                });
+                
+                const result = await response.json();
+                return result;
+                
+            } catch (error) {
+                console.error('Erreur stockage session:', error);
+                return { success: false, error: error.message };
+            }
+        }
+    </script>
 </body>
+</html>
+
 </html>
