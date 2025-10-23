@@ -73,9 +73,25 @@ switch ($action) {
     case 'login_player':
         login_player($pdo);
         break;
+    
+    case 'get_good_answers':
+        get_good_answers($pdo);
+        break;
 
     case 'set_session':
         set_session($pdo);
+        break;
+
+    case 'login_admin':
+        login_admin($pdo);
+        break;
+
+    case 'check_admin_session':
+        check_admin_session();
+        break;
+        
+    case 'logout_admin':
+        logout_admin();
         break;
     
     case 'verify_session':

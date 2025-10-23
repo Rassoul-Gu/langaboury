@@ -381,175 +381,194 @@ body {
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>⚙️ Administration</h1>
-        <p>Gérez votre chasse au trésor en temps réel</p>
+    <div id="admin-login" style="max-width:400px;margin:80px auto;text-align:center;">
+        <h2>Connexion administrateur</h2>
+        <input type="email" id="admin-email" placeholder="Email" style="width:100%;padding:10px;margin:8px 0;"><br>
+        <input type="password" id="admin-password" placeholder="Mot de passe" style="width:100%;padding:10px;margin:8px 0;"><br>
+        <button onclick="loginAdmin()" style="padding:10px 20px;background:#2563EB;color:white;border:none;border-radius:8px;">Se connecter</button>
+        <p id="login-msg" style="color:red;"></p>
     </div>
 
-    <div class="container">
-        <!-- Statistiques -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Groupes</div>
-                <div class="stat-value" id="statGroups">0</div>
+        <div id="admin-content" style="display:none;">
+            <div class="header">
+            <h1>⚙️ Administration</h1>
+            <p>Gérez votre chasse au trésor en temps réel</p>
+        </div>
+
+        <div class="container">
+            
+            
+
+            <!-- Statistiques -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Groupes</div>
+                    <div class="stat-value" id="statGroups">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Énigmes</div>
+                    <div class="stat-value" id="statEnigmes">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Tentatives</div>
+                    <div class="stat-value" id="statSubmissions">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Taux réussite</div>
+                    <div class="stat-value" id="statSuccess">0%</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Énigmes</div>
-                <div class="stat-value" id="statEnigmes">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Tentatives</div>
-                <div class="stat-value" id="statSubmissions">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Taux réussite</div>
-                <div class="stat-value" id="statSuccess">0%</div>
+
+            <!-- Onglets -->
+            <div class="panel">
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('groups')">👥 Groupes</button>
+                    <button class="tab" onclick="showTab('enigmes')">🧩 Énigmes</button>
+                    <button class="tab" onclick="showTab('leaderboard')">🏆 Classement</button>
+                    <button class="tab" onclick="showTab('activity')">📈 Activité</button>
+                    <button class="tab" onclick="window.location.href='https://aser-rouen.fr/aser/langaboury/generate_qr.php'">
+        🔢 Generer QR
+    </button>
+                </div>
+
+                <div id="alertBox" class="alert"></div>
+
+                <!-- Tab Groupes -->
+                <div id="tab-groups" class="tab-content active">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Liste des groupes</h3>
+                        <button class="btn btn-primary" onclick="showCreateGroupForm()">➕ Nouveau Groupe</button>
+                    </div>
+
+                    <div id="createGroupForm" style="display: none; margin-bottom: 30px; padding: 20px; background: #f0f4ff; border-radius: 10px;">
+                        <h4 style="margin-bottom: 15px;">Créer un groupe</h4>
+                        <div class="form-group">
+                            <label class="form-label">Nom du groupe</label>
+                            <input type="text" id="groupName" class="form-input" placeholder="Ex: Les Aventuriers">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Couleur</label>
+                            <input type="color" id="groupColor" class="form-input" value="#3B82F6">
+                        </div>
+                        <button class="btn btn-primary" onclick="createGroup()">Créer</button>
+                        <button class="btn btn-secondary" onclick="hideCreateGroupForm()" style="margin-left: 10px;">Annuler</button>
+                    </div>
+
+                    <table class="table" id="groupsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nom</th>
+                                <th>Couleur</th>
+                                <th>Score</th>
+                                <th>Étape</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- Tab Énigmes -->
+                <div id="tab-enigmes" class="tab-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Liste des énigmes</h3>
+                        <button class="btn btn-primary" onclick="showCreateEnigmeForm()">➕ Nouvelle Énigme</button>
+                    </div>
+
+                    <div id="createEnigmeForm" style="display: none; margin-bottom: 30px; padding: 20px; background: #f0f4ff; border-radius: 10px;">
+                        <h4 style="margin-bottom: 15px;">Créer une énigme</h4>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Groupe</label>
+                            <select id="enigmeGroupId" class="form-select">
+                                <option value="">-- Sélectionner un groupe --</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Numéro d'étape</label>
+                            <input type="number" id="stepNumber" class="form-input" min="1" placeholder="1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Texte de l'énigme</label>
+                            <textarea id="enigmeText" class="form-textarea" placeholder="Ex: Je suis toujours devant toi mais tu ne peux jamais me voir. Qui suis-je ?"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Réponse (en majuscules)</label>
+                            <input type="text" id="answer" class="form-input" placeholder="Ex: AVENIR" style="text-transform: uppercase;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Indication prochaine localisation</label>
+                            <textarea id="nextLocation" class="form-textarea" placeholder="Ex: Dirigez-vous vers la fontaine au centre du parc"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Points</label>
+                            <input type="number" id="points" class="form-input" value="10" min="1">
+                        </div>
+                        
+                        <div style="background:#fef3c7;padding:15px;border-radius:8px;margin-bottom:15px;border-left:4px solid #f59e0b;">
+                            <strong>🔐 Code QR automatique</strong>
+                            <p style="margin-top:8px;font-size:14px;color:#92400e;">
+                                Un code QR aléatoire et sécurisé sera généré automatiquement (ex: X7K9M2P4)
+                            </p>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="createEnigme()">Créer l'énigme</button>
+                        <button class="btn btn-secondary" onclick="hideCreateEnigmeForm()" style="margin-left: 10px;">Annuler</button>
+                    </div>
+
+                    <table class="table" id="enigmesTable">
+                        <thead>
+                            <tr>
+                                <th>Groupe</th>
+                                <th>Étape</th>
+                                <th>Code QR</th>
+                                <th>Énigme</th>
+                                <th>Réponse</th>
+                                <th>Points</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- Tab Classement -->
+                <div id="tab-leaderboard" class="tab-content">
+                    <h3 style="margin-bottom: 20px;">🏆 Classement en direct</h3>
+                    <table class="table" id="leaderboardTable">
+                        <thead>
+                            <tr>
+                                <th>Rang</th>
+                                <th>Groupe</th>
+                                <th>Score</th>
+                                <th>Étape</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- Tab Activité -->
+                <div id="tab-activity" class="tab-content">
+                    <h3 style="margin-bottom: 20px;">📈 Activité récente</h3>
+                    <div id="activityList"></div>
+                </div>
             </div>
         </div>
 
-        <!-- Onglets -->
-        <div class="panel">
-            <div class="tabs">
-                <button class="tab active" onclick="showTab('groups')">👥 Groupes</button>
-                <button class="tab" onclick="showTab('enigmes')">🧩 Énigmes</button>
-                <button class="tab" onclick="showTab('leaderboard')">🏆 Classement</button>
-                <button class="tab" onclick="showTab('activity')">📈 Activité</button>
-                <button class="tab" onclick="window.location.href='https://aser-rouen.fr/aser/langaboury/generate_qr.php'">
-    🔢 Generer QR
-</button>
-            </div>
+        <button class="refresh-btn" onclick="refreshAll()" title="Actualiser">🔄</button>
 
-            <div id="alertBox" class="alert"></div>
-
-            <!-- Tab Groupes -->
-            <div id="tab-groups" class="tab-content active">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3>Liste des groupes</h3>
-                    <button class="btn btn-primary" onclick="showCreateGroupForm()">➕ Nouveau Groupe</button>
-                </div>
-
-                <div id="createGroupForm" style="display: none; margin-bottom: 30px; padding: 20px; background: #f0f4ff; border-radius: 10px;">
-                    <h4 style="margin-bottom: 15px;">Créer un groupe</h4>
-                    <div class="form-group">
-                        <label class="form-label">Nom du groupe</label>
-                        <input type="text" id="groupName" class="form-input" placeholder="Ex: Les Aventuriers">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Couleur</label>
-                        <input type="color" id="groupColor" class="form-input" value="#3B82F6">
-                    </div>
-                    <button class="btn btn-primary" onclick="createGroup()">Créer</button>
-                    <button class="btn btn-secondary" onclick="hideCreateGroupForm()" style="margin-left: 10px;">Annuler</button>
-                </div>
-
-                <table class="table" id="groupsTable">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nom</th>
-                            <th>Couleur</th>
-                            <th>Score</th>
-                            <th>Étape</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-
-            <!-- Tab Énigmes -->
-            <div id="tab-enigmes" class="tab-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3>Liste des énigmes</h3>
-                    <button class="btn btn-primary" onclick="showCreateEnigmeForm()">➕ Nouvelle Énigme</button>
-                </div>
-
-                <div id="createEnigmeForm" style="display: none; margin-bottom: 30px; padding: 20px; background: #f0f4ff; border-radius: 10px;">
-                    <h4 style="margin-bottom: 15px;">Créer une énigme</h4>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Groupe</label>
-                        <select id="enigmeGroupId" class="form-select">
-                            <option value="">-- Sélectionner un groupe --</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Numéro d'étape</label>
-                        <input type="number" id="stepNumber" class="form-input" min="1" placeholder="1">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Texte de l'énigme</label>
-                        <textarea id="enigmeText" class="form-textarea" placeholder="Ex: Je suis toujours devant toi mais tu ne peux jamais me voir. Qui suis-je ?"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Réponse (en majuscules)</label>
-                        <input type="text" id="answer" class="form-input" placeholder="Ex: AVENIR" style="text-transform: uppercase;">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Indication prochaine localisation</label>
-                        <textarea id="nextLocation" class="form-textarea" placeholder="Ex: Dirigez-vous vers la fontaine au centre du parc"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Points</label>
-                        <input type="number" id="points" class="form-input" value="10" min="1">
-                    </div>
-                    
-                    <div style="background:#fef3c7;padding:15px;border-radius:8px;margin-bottom:15px;border-left:4px solid #f59e0b;">
-                        <strong>🔐 Code QR automatique</strong>
-                        <p style="margin-top:8px;font-size:14px;color:#92400e;">
-                            Un code QR aléatoire et sécurisé sera généré automatiquement (ex: X7K9M2P4)
-                        </p>
-                    </div>
-                    
-                    <button class="btn btn-primary" onclick="createEnigme()">Créer l'énigme</button>
-                    <button class="btn btn-secondary" onclick="hideCreateEnigmeForm()" style="margin-left: 10px;">Annuler</button>
-                </div>
-
-                <table class="table" id="enigmesTable">
-                    <thead>
-                        <tr>
-                            <th>Groupe</th>
-                            <th>Étape</th>
-                            <th>Code QR</th>
-                            <th>Énigme</th>
-                            <th>Réponse</th>
-                            <th>Points</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-
-            <!-- Tab Classement -->
-            <div id="tab-leaderboard" class="tab-content">
-                <h3 style="margin-bottom: 20px;">🏆 Classement en direct</h3>
-                <table class="table" id="leaderboardTable">
-                    <thead>
-                        <tr>
-                            <th>Rang</th>
-                            <th>Groupe</th>
-                            <th>Score</th>
-                            <th>Étape</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-
-            <!-- Tab Activité -->
-            <div id="tab-activity" class="tab-content">
-                <h3 style="margin-bottom: 20px;">📈 Activité récente</h3>
-                <div id="activityList"></div>
-            </div>
+        <button onclick="logoutAdmin()" style="float:right;background:red;color:white;padding:8px;border:none;border-radius:6px;">Déconnexion</button>
+        <div id="admin-main">
+            <!-- ton contenu admin habituel -->
         </div>
     </div>
 
-    <button class="refresh-btn" onclick="refreshAll()" title="Actualiser">🔄</button>
-
+    
     <script>
         const GAME_ID = 1;
 
@@ -854,6 +873,57 @@ body {
                 });
             }
         });
+
+         document.addEventListener('DOMContentLoaded', checkAdminSession);
+
+    function checkAdminSession() {
+        fetch('api_simple.php?action=check_admin_session')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('admin-login').style.display = 'none';
+                    document.getElementById('admin-content').style.display = 'block';
+                } else {
+                    document.getElementById('admin-login').style.display = 'block';
+                    document.getElementById('admin-content').style.display = 'none';
+                }
+            });
+    }
+
+    function loginAdmin() {
+        const email = document.getElementById('admin-email').value.trim();
+        const password = document.getElementById('admin-password').value.trim();
+        const msg = document.getElementById('login-msg');
+
+        fetch('api_simple.php?action=login_admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                msg.style.color = 'green';
+                msg.textContent = data.message;
+                setTimeout(() => checkAdminSession(), 500);
+            } else {
+                msg.style.color = 'red';
+                msg.textContent = data.message;
+            }
+        })
+        .catch(() => {
+            msg.style.color = 'red';
+            msg.textContent = 'Erreur de connexion au serveur.';
+        });
+    }
+
+    function logoutAdmin() {
+        fetch('api_simple.php?action=logout_admin')
+            .then(() => {
+                document.getElementById('admin-login').style.display = 'block';
+                document.getElementById('admin-content').style.display = 'none';
+            });
+    }
     </script>
 </body>
 </html>

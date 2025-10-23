@@ -4,6 +4,7 @@
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -478,6 +479,14 @@
                     <div class="loader"></div>
                 </div>
             </div>
+
+            <!-- 🧩 Historique des bonnes réponses -->
+            <div id="historique-container" style="margin-top:40px;">
+                <h2 style="color:#2563EB;">Historique des bonnes réponses du groupe</h2>
+                <div id="historique-content">
+                    <p style="color:#555;">Chargement...</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -518,6 +527,49 @@
                 window.location.href = '/connexion.php';
             }
         }
+
+        function fetchHistorique() {
+            
+            fetch(`api_simple.php?action=get_good_answers&group_id=${groupId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('historique-content');
+                    if (data.status === 'success') {
+                        if (data.data.length === 0) {
+                            container.innerHTML = '<p style="color:#555;">Aucune bonne réponse pour le moment.</p>';
+                            return;
+                        }
+
+                        let html = `
+                            <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                                <thead>
+                                    <tr style="background-color:#2563EB; color:white;">
+                                        <th style="padding:10px; text-align:left;">Question</th>
+                                        <th style="padding:10px; text-align:left;">Bonne réponse</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+
+                        for (const row of data.data) {
+                            html += `
+                                <tr style="border-bottom:1px solid #ddd;">
+                                    <td style="padding:10px;">${row.question_name}</td>
+                                    <td style="padding:10px;">${row.correct_answer}</td>
+                                </tr>
+                            `;
+                        }
+
+                        html += '</tbody></table>';
+                        container.innerHTML = html;
+                    } else {
+                        container.innerHTML = '<p style="color:red;">Erreur de chargement.</p>';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('historique-content').innerHTML = '<p style="color:red;">Erreur de connexion au serveur.</p>';
+                });
+            }
 
         async function loadGameState() {
             try {
@@ -744,6 +796,15 @@
                 if (e.key === 'Enter') submitQRCode();
             });
         });
+
+        
+
+            // 🔁 Rafraîchir toutes les 2 secondes
+            setInterval(fetchHistorique, 2000);
+
+            // // 🏁 Charger une première fois au démarrage
+            // document.addEventListener('DOMContentLoaded', fetchHistorique);
+
     </script>
 </body>
 </html>
