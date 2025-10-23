@@ -401,13 +401,18 @@
 
         /* ===== ADMIN LOGIN STYLES ===== */
         .admin-login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
             padding: 20px;
             background: linear-gradient(135deg, #667eea, #764ba2);
+            z-index: 10000;
         }
 
         .admin-login-box {
@@ -417,7 +422,8 @@
             width: 100%;
             max-width: 400px;
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: auto;
         }
 
         .admin-login-title {
