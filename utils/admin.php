@@ -179,6 +179,7 @@ function adminGetActivity($pdo) {
     echo json_encode(['activity' => $activity]);
 }
 
+
 function adminGetEnigmesByGroup($pdo) {
     $game_id = intval($_GET['game_id'] ?? 1);
     
@@ -202,6 +203,71 @@ function adminGetEnigmesByGroup($pdo) {
     $enigmes = $stmt->fetchAll();
     
     echo json_encode(['enigmes' => $enigmes]);
+}
+
+
+function login_admin($pdo)
+{
+    header('Content-Type: application/json');
+    session_start();
+
+    $email = trim($_POST['email'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+
+    if (empty($email) || empty($password)) {
+        echo json_encode(['status' => 'error', 'message' => 'Veuillez remplir tous les champs.']);
+        return;
+    }
+
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM admins WHERE email = ?");
+        $stmt->execute([$email]);
+        $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Vérifie si l'admin existe et si le mot de passe correspond
+        if (!$admin || !hash_equals($admin['password_hash'], hash('sha256', $password))) {
+            echo json_encode(['status' => 'error', 'message' => 'Identifiants incorrects.']);
+            return;
+        }
+
+        // Création de la session admin
+        $_SESSION['admin_logged'] = true;
+        $_SESSION['admin_email'] = $admin['email'];
+
+        echo json_encode(['status' => 'success', 'message' => 'Connexion réussie.']);
+    } catch (Exception $e) {
+        echo json_encode(['status' => 'error', 'message' => 'Erreur serveur : ' . $e->getMessage()]);
+    }
+}
+
+
+function check_admin_session()
+{
+    header('Content-Type: application/json');
+    session_start();
+
+    if (!empty($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true) {
+        echo json_encode([
+            'status' => 'success',
+            'email' => $_SESSION['admin_email']
+        ]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Non connecté.']);
+    }
+}
+
+/**
+ * 🚪 Déconnexion de l’admin
+ * Détruit la session
+ */
+function logout_admin()
+{
+    header('Content-Type: application/json');
+    session_start();
+    session_unset();
+    session_destroy();
+
+    echo json_encode(['status' => 'success', 'message' => 'Déconnexion réussie.']);
 }
 
 
