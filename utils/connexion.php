@@ -111,7 +111,7 @@ function login_player($pdo) {
         
         // Configuration de la session avec timeout de 2 heures
         session_set_cookie_params([
-            'lifetime' => 7200,
+            'lifetime' => 30,
             'path' => '/',
             'domain' => $_SERVER['HTTP_HOST'] ?? '',
             'secure' => isset($_SERVER['HTTPS']),
@@ -131,8 +131,8 @@ function login_player($pdo) {
         $_SESSION['group_name'] = $player['group_name'];
         $_SESSION['login_time'] = time();
         $_SESSION['timeout'] = 7200;
-
-        
+	//header('Location : player.php');
+	//exit;
         echo json_encode([
             'success' => true,
             'player' => [
