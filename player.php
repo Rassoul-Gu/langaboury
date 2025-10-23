@@ -1,6 +1,5 @@
 <?php
 	session_start();
-	echo $_SESSION['player_id'];
 ?>
 
 <!DOCTYPE html>
