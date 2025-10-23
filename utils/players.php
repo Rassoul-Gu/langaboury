@@ -183,4 +183,30 @@ function submitAnswer($pdo) {
     }
 }
 
+function get_good_answers($pdo){
+    header('Content-Type: application/json');
+
+    $group_id = intval($_GET['group_id'] ?? 0);
+    if ($group_id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID groupe invalide']);
+        return;
+    }
+
+    try {
+        $stmt = $pdo->prepare("
+            SELECT e.enigme_text AS question_name, e.answer AS correct_answer
+            FROM submissions s
+            INNER JOIN enigmes e ON e.id = s.enigme_id
+            WHERE s.group_id = :group_id AND s.is_correct = 1
+            ORDER BY s.id DESC
+        ");
+        $stmt->execute([':group_id' => $group_id]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode(['status' => 'success', 'data' => $rows]);
+    } catch (Exception $e) {
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+}
+
 ?>

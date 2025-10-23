@@ -1,7 +1,3 @@
-<?php
-require_once 'config.php';
-session_start();
-?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -83,7 +79,7 @@ session_start();
 <body>
 
     <h1>📝 Inscription</h1>
-    <div class="message"><?= $message ?></div>
+    <div class="message"><?= $message ?? '' ?></div>
 
     <form id="registerForm">
         <label>Nom :</label>

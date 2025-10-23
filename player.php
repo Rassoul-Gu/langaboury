@@ -1,10 +1,10 @@
 <?php
-session_start();
-echo $_SESSION['player_id'];
+	session_start();
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -398,6 +398,89 @@ echo $_SESSION['player_id'];
                 font-size: 20px;
             }
         }
+
+        /* ===== HISTORIQUE ===== */
+        .historique-wrapper {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .historique-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        .historique-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .historique-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 13px;
+            text-transform: uppercase;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .historique-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .historique-table tr {
+            transition: background 0.2s ease;
+        }
+
+        .historique-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .historique-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .no-history {
+            text-align: center;
+            color: #6b7280;
+            padding: 40px 20px;
+            font-style: italic;
+        }
+
+        /* Responsive pour l'historique */
+        @media (max-width: 600px) {
+            .historique-wrapper {
+                padding: 20px;
+            }
+            
+            .historique-title {
+                font-size: 20px;
+            }
+            
+            .historique-table th,
+            .historique-table td {
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            .historique-table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+    }
+
     </style>
 </head>
 <body>
@@ -479,6 +562,18 @@ echo $_SESSION['player_id'];
                     <div class="loader"></div>
                 </div>
             </div>
+
+            <!-- 🧩 Historique des bonnes réponses du groupe -->
+           <div class="historique-wrapper">
+                <h2 class="historique-title">🏆 Historique des bonnes réponses du groupe</h2>
+                <div id="historique-content">
+                    <div style="text-align: center; padding: 20px; color: #555;">
+                        <div class="loader"></div>
+                        <p>Chargement de l'historique...</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -518,6 +613,48 @@ echo $_SESSION['player_id'];
                 alert('Erreur: ' + error.message + '\nRedirection vers la connexion...');
                 window.location.href = '/connexion.php';
             }
+        }
+
+        function fetchHistorique() {
+            fetch(`api_simple.php?action=get_good_answers&group_id=${groupId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('historique-content');
+                    if (data.status === 'success') {
+                        if (data.data.length === 0) {
+                            container.innerHTML = '<p class="no-history">Aucune bonne réponse pour le moment.</p>';
+                            return;
+                        }
+
+                        let html = `
+                            <table class="historique-table">
+                                <thead>
+                                    <tr>
+                                        <th>Question</th>
+                                        <th>Bonne réponse</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+
+                        for (const row of data.data) {
+                            html += `
+                                <tr>
+                                    <td>${row.question_name}</td>
+                                    <td><strong>${row.correct_answer}</strong></td>
+                                </tr>
+                            `;
+                        }
+
+                        html += '</tbody></table>';
+                        container.innerHTML = html;
+                    } else {
+                        container.innerHTML = '<p class="no-history" style="color:#ef4444;">Erreur de chargement de l\'historique.</p>';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('historique-content').innerHTML = '<p class="no-history" style="color:#ef4444;">Erreur de connexion au serveur.</p>';
+                });
         }
 
         async function loadGameState() {
@@ -745,6 +882,15 @@ echo $_SESSION['player_id'];
                 if (e.key === 'Enter') submitQRCode();
             });
         });
+
+        
+
+            // 🔁 Rafraîchir toutes les 2 secondes
+            setInterval(fetchHistorique, 2000);
+
+            // // 🏁 Charger une première fois au démarrage
+            // document.addEventListener('DOMContentLoaded', fetchHistorique);
+
     </script>
 </body>
 </html>

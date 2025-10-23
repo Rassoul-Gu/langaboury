@@ -379,7 +379,7 @@
             </div>
 
             <div class="cta-buttons">
-                <a href="player.html" class="btn btn-primary">
+                <a href="player.php" class="btn btn-primary">
                     <span>🎮</span>
                     <span>Jouer Maintenant</span>
                 </a>

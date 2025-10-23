@@ -94,10 +94,10 @@ require_once 'config.php';
         <label>Code d'accès :</label>
         <input type="text" name="code_access" required>
 
-        <button type="submit">S'inscrire</button>
+        <button type="submit">Se connecter</button>
 
         <p style="margin-top:15px; text-align:center;">
-            Déjà inscrit ? <a href="connexion.php">Se connecter</a>
+            Pas encore inscrit ? <a href="connexion.php">S'inscrire</a>
         </p>
     </form>
 
@@ -116,15 +116,15 @@ require_once 'config.php';
                 const sessionResult = await storeSessionData(data.player);
                 
                 if (sessionResult.success) {
-                    showMessage('✅ Connexion réussie ! Redirection...', 'success');
+                    //showMessage('✅ Connexion réussie ! Redirection...', 'success');
                     
                     // Animation de succès
-                    submitBtn.innerHTML = `
+                    /*submitBtn.innerHTML = `
                         <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
                             <span>✅</span>
                             <span>Connecté !</span>
                         </div>
-                    `;
+                    `;*/
                     
                     // Redirection après 1.5 secondes
                     setTimeout(() => {
