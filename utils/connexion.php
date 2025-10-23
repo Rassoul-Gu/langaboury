@@ -250,4 +250,48 @@ function logout_player($pdo) {
     ]);
 }
 
+
+// ==================== FONCTIONS SESSION ====================
+
+function set_session($pdo) {
+    session_start();
+    
+    $input = json_decode(file_get_contents('php://input'), true);
+    $player_data = $input['player_data'] ?? null;
+    
+    if (!$player_data) {
+        http_response_code(400);
+        exit(json_encode(['error' => 'Données joueur manquantes']));
+    }
+    
+    try {
+        // Stocker les données dans la session PHP
+        $_SESSION['player_id'] = $player_data['id'];
+        $_SESSION['player_name'] = $player_data['name'];
+        $_SESSION['player_surname'] = $player_data['surname'];
+        $_SESSION['player_email'] = $player_data['email'];
+        $_SESSION['group_id'] = $player_data['group_id'];
+        $_SESSION['group_name'] = $player_data['group_name'];
+        $_SESSION['group_color'] = $player_data['group_color'];
+        $_SESSION['group_score'] = $player_data['group_score'];
+        $_SESSION['group_step'] = $player_data['group_step'];
+        $_SESSION['login_time'] = time();
+        
+        // Régénérer l'ID de session pour plus de sécurité
+        session_regenerate_id(true);
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Session mise à jour',
+            'session_id' => session_id()
+        ]);
+        
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Erreur mise à jour session: ' . $e->getMessage()]);
+    }
+}
+
 ?>
+
+
