@@ -92,6 +92,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $headers .= "Reply-To: admin@aser-rouen.fr\r\n";
         $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
+
+
         mail($email, $subject, $message, $headers);
 
         // Redirection vers la page du joueur
