@@ -547,25 +547,14 @@
             </div>
 
             <!-- 🧩 Historique des bonnes réponses du groupe -->
-            <div class="historique-wrapper">
+           <div class="historique-wrapper">
                 <h2 class="historique-title">🏆 Historique des bonnes réponses du groupe</h2>
-
-                <?php if (empty($historique)): ?>
-                    <p class="no-history">Aucune bonne réponse enregistrée pour le moment.</p>
-                <?php else: ?>
-                    <div class="historique-cards">
-                        <?php foreach ($historique as $item): ?>
-                            <div class="historique-card">
-                                <div class="historique-question">
-                                    <?php echo htmlspecialchars($item['question_name']); ?>
-                                </div>
-                                <div class="historique-answer">
-                                    <?php echo htmlspecialchars($item['correct_answer']); ?>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
+                <div id="historique-content">
+                    <div style="text-align: center; padding: 20px; color: #555;">
+                        <div class="loader"></div>
+                        <p>Chargement de l'historique...</p>
                     </div>
-                <?php endif; ?>
+                </div>
             </div>
 
         </div>
@@ -610,14 +599,13 @@
         }
 
         function fetchHistorique() {
-            
             fetch(`api_simple.php?action=get_good_answers&group_id=${groupId}`)
                 .then(res => res.json())
                 .then(data => {
                     const container = document.getElementById('historique-content');
                     if (data.status === 'success') {
                         if (data.data.length === 0) {
-                            container.innerHTML = '<p style="color:#555;">Aucune bonne réponse pour le moment.</p>';
+                            container.innerHTML = '<p style="color:#555; text-align:center; padding:20px;">Aucune bonne réponse pour le moment.</p>';
                             return;
                         }
 
@@ -644,13 +632,13 @@
                         html += '</tbody></table>';
                         container.innerHTML = html;
                     } else {
-                        container.innerHTML = '<p style="color:red;">Erreur de chargement.</p>';
+                        container.innerHTML = '<p style="color:red; text-align:center;">Erreur de chargement.</p>';
                     }
                 })
                 .catch(() => {
-                    document.getElementById('historique-content').innerHTML = '<p style="color:red;">Erreur de connexion au serveur.</p>';
+                    document.getElementById('historique-content').innerHTML = '<p style="color:red; text-align:center;">Erreur de connexion au serveur.</p>';
                 });
-            }
+        }
 
         async function loadGameState() {
             try {
