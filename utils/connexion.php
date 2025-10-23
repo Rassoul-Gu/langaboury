@@ -148,7 +148,7 @@ function login_player($pdo) {
             ],
             'session_id' => session_id(),
             'timeout' => 7200,
-            'redirect_url' => '/player.html', // AJOUT DE LA REDIRECTION
+            'redirect_url' => '/player.php', // AJOUT DE LA REDIRECTION
             'message' => 'Connexion réussie'
         ]);
         
