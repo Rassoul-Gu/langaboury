@@ -399,70 +399,87 @@
             }
         }
 
-        /* --- HISTORIQUE DES BONNES RÉPONSES --- */
-
+        /* ===== HISTORIQUE ===== */
         .historique-wrapper {
-            background: linear-gradient(135deg, #7b61ff, #6342f5);
-            border-radius: 20px;
+            background: white;
+            border-radius: 15px;
             padding: 25px;
-            margin-top: 40px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
 
         .historique-title {
-            font-size: 1.5em;
-            font-weight: 600;
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
             text-align: center;
-            margin-bottom: 25px;
-            color: #fff;
         }
 
-        .historique-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        .historique-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
         }
 
-        .historique-card {
-            background: white;
-            border-radius: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            color: #333;
-            font-weight: 500;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .historique-card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .historique-question {
-            color: #4f46e5;
+        .historique-table th {
+            background: #f9fafb;
             font-weight: 600;
-            flex: 1;
+            color: #6b7280;
+            font-size: 13px;
+            text-transform: uppercase;
+            padding: 15px;
+            text-align: left;
         }
 
-        .historique-answer {
-            background: #e0e7ff;
-            color: #1e3a8a;
-            font-weight: bold;
-            padding: 8px 14px;
-            border-radius: 10px;
-            text-align: center;
-            min-width: 80px;
+        .historique-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .historique-table tr {
+            transition: background 0.2s ease;
+        }
+
+        .historique-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .historique-table tr:last-child td {
+            border-bottom: none;
         }
 
         .no-history {
             text-align: center;
-            font-size: 1.1em;
-            color: #f0f0f0;
-            opacity: 0.9;
+            color: #6b7280;
+            padding: 40px 20px;
+            font-style: italic;
         }
+
+        /* Responsive pour l'historique */
+        @media (max-width: 600px) {
+            .historique-wrapper {
+                padding: 20px;
+            }
+            
+            .historique-title {
+                font-size: 20px;
+            }
+            
+            .historique-table th,
+            .historique-table td {
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            .historique-table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+    }
 
     </style>
 </head>
@@ -605,16 +622,16 @@
                     const container = document.getElementById('historique-content');
                     if (data.status === 'success') {
                         if (data.data.length === 0) {
-                            container.innerHTML = '<p style="color:#555; text-align:center; padding:20px;">Aucune bonne réponse pour le moment.</p>';
+                            container.innerHTML = '<p class="no-history">Aucune bonne réponse pour le moment.</p>';
                             return;
                         }
 
                         let html = `
-                            <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                            <table class="historique-table">
                                 <thead>
-                                    <tr style="background-color:#2563EB; color:white;">
-                                        <th style="padding:10px; text-align:left;">Question</th>
-                                        <th style="padding:10px; text-align:left;">Bonne réponse</th>
+                                    <tr>
+                                        <th>Question</th>
+                                        <th>Bonne réponse</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -622,9 +639,9 @@
 
                         for (const row of data.data) {
                             html += `
-                                <tr style="border-bottom:1px solid #ddd;">
-                                    <td style="padding:10px;">${row.question_name}</td>
-                                    <td style="padding:10px;">${row.correct_answer}</td>
+                                <tr>
+                                    <td>${row.question_name}</td>
+                                    <td><strong>${row.correct_answer}</strong></td>
                                 </tr>
                             `;
                         }
@@ -632,11 +649,11 @@
                         html += '</tbody></table>';
                         container.innerHTML = html;
                     } else {
-                        container.innerHTML = '<p style="color:red; text-align:center;">Erreur de chargement.</p>';
+                        container.innerHTML = '<p class="no-history" style="color:#ef4444;">Erreur de chargement de l\'historique.</p>';
                     }
                 })
                 .catch(() => {
-                    document.getElementById('historique-content').innerHTML = '<p style="color:red; text-align:center;">Erreur de connexion au serveur.</p>';
+                    document.getElementById('historique-content').innerHTML = '<p class="no-history" style="color:#ef4444;">Erreur de connexion au serveur.</p>';
                 });
         }
 
