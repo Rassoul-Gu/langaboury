@@ -1,0 +1,68 @@
+* {
+    margin: 0; padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+body {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-align: center;
+}
+form {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 400px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+}
+input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 8px;
+    outline: none;
+}
+button {
+    margin-top: 20px;
+    background: #5a67d8;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    width: 100%;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+button:hover {
+    background: #434190;
+}
+.message { margin-top: 15px; text-align: center; }
+.error { color: #ff8080; }
+.success { color: #9ae6b4; }
+.warning { color: #f6e05e; }
+a {
+    color: #c3dafe;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
